@@ -1,0 +1,82 @@
+schema_version: "1"
+scenario_id: error-envelope-correction
+description: >-
+  Flawed invocations must yield structured, corrective errors and
+  class-accurate exit codes: not-found for a missing session,
+  conflict with candidates for an ambiguous prefix, usage for an
+  unknown flag and an unknown command.
+binary: stem
+factor_coverage: [4, 11]
+tier: 3
+story_ref:
+  story_id: stem.conformance.error-envelope-correction
+  story_path: stories/error-envelope-correction.yaml
+  content_hash: "sha256:760bfd75c87c4d9ac54e456a716875ab0a5a39d3626b5918eabb9d28eb4fab94"
+steps:
+  - id: show_missing
+    invoke: ["stem", "sessions", "show", "deadbeef", "--format", "json"]
+    capture: [exit_code, stdout, stderr]
+  - id: show_ambiguous
+    invoke: ["stem", "sessions", "show", "0198", "--format", "json"]
+    capture: [exit_code, stdout, stderr]
+  - id: unknown_flag
+    invoke: ["stem", "sessions", "list", "--bogus-flag", "--format", "json"]
+    capture: [exit_code, stdout, stderr]
+  - id: unknown_command
+    invoke: ["stem", "frobnicate"]
+    capture: [exit_code, stdout, stderr]
+assertions:
+  - id: envelope-has-code
+    kind: stderr_contains
+    on: show_missing
+    factor: 4
+    value: '"code"'
+  # Factor 4 makes corrective guidance normative but prescribes no
+  # canonical key; stem's error document spells it `hint` (spec
+  # §3.6), inside the accepted key family.
+  - id: envelope-offers-correction
+    kind: stderr_contains
+    on: show_missing
+    factor: 4
+    value: "(suggestion|suggested_fix|corrections|alternatives|hint|did you mean)"
+    regex: true
+  - id: missing-id-not-found-class
+    kind: exit_code_class
+    on: show_missing
+    factor: 11
+    classes: [NOT_FOUND]
+  - id: ambiguous-lists-candidates
+    kind: stderr_contains
+    on: show_ambiguous
+    factor: 4
+    value: '"candidates"'
+  - id: ambiguous-offers-correction
+    kind: stderr_contains
+    on: show_ambiguous
+    factor: 4
+    value: "longer prefix"
+  - id: ambiguous-conflict-class
+    kind: exit_code_class
+    on: show_ambiguous
+    factor: 11
+    classes: [CONFLICT]
+  - id: unknown-flag-correction-hint
+    kind: stderr_contains
+    on: unknown_flag
+    factor: 4
+    value: "--help"
+  - id: unknown-flag-usage-class
+    kind: exit_code_class
+    on: unknown_flag
+    factor: 11
+    classes: [USAGE]
+  - id: unknown-command-rejected
+    kind: stderr_contains
+    on: unknown_command
+    factor: 4
+    value: "unknown command"
+  - id: unknown-command-usage-class
+    kind: exit_code_class
+    on: unknown_command
+    factor: 11
+    classes: [USAGE]

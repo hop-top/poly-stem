@@ -1,0 +1,19 @@
+# Dependencies
+/vendor/
+
+# Test/cache outputs
+.phpunit.result.cache
+.phpunit.cache/
+/coverage/
+/build/
+
+# Composer artifacts that are not release inputs
+composer.phar
+
+# Local workspace/editor noise
+.DS_Store
+.idea/
+.vscode/
+
+# Composer lock is a release input.
+!composer.lock

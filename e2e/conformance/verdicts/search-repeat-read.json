@@ -1,0 +1,76 @@
+{
+  "scenario_id": "search-repeat-read",
+  "schema_version": "1",
+  "verdict": "pass",
+  "scored_at": "2026-08-08T23:28:55.693262Z",
+  "grader_version": "1.0.0",
+  "rules_version": "2026.05.12.1",
+  "tier": 3,
+  "facets": [
+    {
+      "factor": 7,
+      "status": "pass"
+    },
+    {
+      "factor": 3,
+      "status": "pass"
+    }
+  ],
+  "assertions": [
+    {
+      "id": "first-read-clean",
+      "kind": "exit_code_equals",
+      "factor": 7,
+      "status": "pass",
+      "observed": 0,
+      "expected": 0
+    },
+    {
+      "id": "repeat-read-clean",
+      "kind": "exit_code_equals",
+      "factor": 7,
+      "status": "pass",
+      "observed": 0,
+      "expected": 0
+    },
+    {
+      "id": "match-count-stable-first",
+      "kind": "output_field_count",
+      "factor": 7,
+      "status": "pass",
+      "observed": 2,
+      "expected": 2
+    },
+    {
+      "id": "match-count-stable-again",
+      "kind": "output_field_count",
+      "factor": 7,
+      "status": "pass",
+      "observed": 2,
+      "expected": 2
+    },
+    {
+      "id": "top-match-stable-first",
+      "kind": "output_field_equals",
+      "factor": 7,
+      "status": "pass",
+      "observed": "0198bb00-2222-7abc-8def-aabbccddeeff",
+      "expected": "0198bb00-2222-7abc-8def-aabbccddeeff"
+    },
+    {
+      "id": "top-match-stable-again",
+      "kind": "output_field_equals",
+      "factor": 7,
+      "status": "pass",
+      "observed": "0198bb00-2222-7abc-8def-aabbccddeeff",
+      "expected": "0198bb00-2222-7abc-8def-aabbccddeeff"
+    },
+    {
+      "id": "repeat-read-structured",
+      "kind": "stream_discipline_pass",
+      "factor": 3,
+      "status": "pass",
+      "expected": "stream discipline OK"
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+# stem sessions pack — `stem sessions show --format json` shape.
+# The output is the normalized crtx v0.1 Envelope verbatim
+# (docs/specs/sessions-cli.md §3.4). The authoritative schema is
+# upstream envelope.schema.json in the crtx spec repo; this contract
+# pins the invariant subset: required envelope fields, version pin,
+# role enum, fork-field pairing, fork/dispatch mutual exclusion.
+name: stem-sessions-show-json-0.1
+provider: stem
+evaluators:
+  - name: json_schema_valid
+    mode: binary
+    schema:
+      type: object
+      required: [crtx_version, id, created_at, updated_at, source, turns]
+      properties:
+        crtx_version: { const: "0.1" }
+        id: { type: string, minLength: 4 }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        source:
+          type: object
+          required: [kind, version]
+          properties:
+            kind: { type: string }
+            version: { type: string }
+            instance: { type: string }
+        turns:
+          type: array
+          items:
+            type: object
+            required: [id, role, created_at, content]
+            properties:
+              id: { type: string }
+              role: { enum: [user, assistant, tool, system, developer] }
+              created_at: { type: string, format: date-time }
+              content:
+                type: array
+                minItems: 1
+                items:
+                  type: object
+                  required: [type]
+                  properties:
+                    type: { type: string }
+        parent_id: { type: string }
+        fork_point: { type: integer, minimum: 0 }
+        dispatched_from:
+          type: object
+          required: [envelope_id, call_id]
+          properties:
+            envelope_id: { type: string }
+            call_id: { type: string }
+        metadata: { type: object }
+      dependentRequired:
+        parent_id: [fork_point]
+        fork_point: [parent_id]
+      not:
+        required: [parent_id, dispatched_from]

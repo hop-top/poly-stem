@@ -1,0 +1,18 @@
+{"timestamp":"2026-08-02T09:00:00.000Z","type":"session_meta","payload":{"id":"01900000-0000-7000-8000-00000000000e","timestamp":"2026-08-02T09:00:00.000Z","cwd":"/home/dev/drift","cli_version":"9.9.9","source":"cli","future_field":{"nested":true}},"future_top_level":"tolerated"}
+{"timestamp":"2026-08-02T09:00:01.000Z","type":"resp
+{"timestamp":"2026-08-02T09:00:02.000Z","type":"telemetry","payload":{"metric":"latency","value":12}}
+{"timestamp":"2026-08-02T09:00:03.000Z","type":"response_item","payload":{"type":"hologram","frames":3}}
+{"timestamp":"2026-08-02T09:00:04.000Z","type":"response_item","payload":{"type":"message","role":"user","content":[{"type":"input_audio","data":"AAAA"},{"type":"input_text","text":"mixed parts survive"}]}}
+{"timestamp":"2026-08-02T09:00:05.000Z","type":"response_item","payload":{"type":"message","role":"overseer","content":[{"type":"input_text","text":"unknown role dropped"}]}}
+{"timestamp":"2026-08-02T09:00:06.000Z","type":"response_item","payload":{"type":"message","role":"user","content":[{"type":"input_audio","data":"BBBB"}]}}
+{"timestamp":"2026-08-02T09:00:07.000Z","type":"response_item","payload":{"type":"function_call_output","call_id":"call_404","output":"orphaned result"}}
+{"timestamp":"2026-08-02T09:00:08.000Z","type":"response_item","payload":{"type":"function_call","name":"exec_command","arguments":"not json {","call_id":"call_005"}}
+{"timestamp":"2026-08-02T09:00:09.000Z","type":"response_item","payload":{"type":"function_call_output","call_id":"call_005","output":"ok"}}
+{"timestamp":"2026-08-02T09:00:10.000Z","type":"response_item","payload":{"type":"reasoning","summary":[],"encrypted_content":"opaque-only"}}
+{"timestamp":"2026-08-02T09:00:11.000Z","type":"response_item","payload":{"type":"reasoning","summary":[],"content":[{"type":"reasoning_text","text":"raw chain of thought"}]}}
+{"timestamp":"2026-08-02T09:00:12.000Z","type":"response_item","payload":{"type":"web_search_call","status":"completed","action":{"type":"search","query":"synthetic query"}}}
+{"timestamp":"2026-08-02T09:00:13.000Z","type":"compacted","payload":{"message":"","replacement_history":[{"type":"message","role":"user","content":[{"type":"input_text","text":"summary of earlier turns"}]}]}}
+{"timestamp":"2026-08-02T09:00:14.000Z","type":"response_item","payload":{"type":"message","role":"user","content":[{"type":"input_image","image_url":"data:image/png;base64,QUJD"}]}}
+
+{"timestamp":"2026-08-02T09:00:15.000Z","type":"response_item","payload":{"type":"function_call","name":"","arguments":"{}","call_id":""}}
+{"timestamp":"2026-08-02T09:00:16.000Z","type":"response_item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"survived the drift"}]}}

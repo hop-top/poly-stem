@@ -1,0 +1,24 @@
+# stem sessions contracts pack manifest.
+#
+# Pins the JSON output shapes of the `stem sessions` command group —
+# see docs/specs/sessions-cli.md §3. One contract per leaf plus the
+# error document. Run individually via
+# `eva run --contract <file> --input <captured-stdout>`.
+name: stem-sessions
+version: 0.1
+description: |
+  Output-shape gate for `stem sessions` --format json: list, search,
+  show (crtx envelope invariants), lineage, and the structured error
+  document. Deterministic json_schema_valid evaluators only — no LLM
+  calls.
+contracts:
+  - path: list.yaml
+    name: stem-sessions-list-json-0.1
+  - path: search.yaml
+    name: stem-sessions-search-json-0.1
+  - path: show.yaml
+    name: stem-sessions-show-json-0.1
+  - path: lineage.yaml
+    name: stem-sessions-lineage-json-0.1
+  - path: error.yaml
+    name: stem-sessions-error-json-0.1

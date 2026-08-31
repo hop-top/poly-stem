@@ -1,0 +1,42 @@
+[package]
+name = "hop-top-stem"
+version = "0.0.0"
+edition = "2021"
+license = "MIT"
+description = "Polyglot AI agent runtime — crtx v0.1 envelope SDK (Rust)."
+authors = [
+  "Idea Crafters LLC <lab@ideacrafters.com>",
+  "Jad Bitar",
+  "Monaam Benhouria",
+]
+repository = "https://github.com/hop-top/poly-stem"
+homepage = "https://hop.top/stem"
+documentation = "https://github.com/hop-top/poly-stem/tree/main/rs"
+readme = "README.md"
+keywords = ["agent", "envelope", "multi-agent", "conversation", "llm"]
+categories = ["api-bindings", "data-structures", "encoding"]
+include = [
+  "Cargo.toml",
+  "Cargo.lock",
+  "README.md",
+  "CHANGELOG.md",
+  "src/**",
+  "tests/**",
+]
+# CHANGELOG.md is intentionally listed even though it does not exist
+# in the initial public-release tree: release-please commits it into
+# its release PR before the cargo publish job runs. If a maintainer
+# ever publishes from a non-release-please tag, drop the entry.
+
+[dependencies]
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.149"
+thiserror = "1.0.69"
+
+[workspace]
+members = [
+  ".",
+  "examples/current-time",
+  "examples/web-search",
+]
+

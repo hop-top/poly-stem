@@ -1,0 +1,20 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/hop-top/kit/main/contracts/story-schema.json
+schema_version: "1"
+story_id: stem.conformance.sessions-show-envelope
+title: Read one session's crtx envelope verbatim
+binary: stem
+intent: |
+  A crtx-aware consumer needs one full session — every turn, role,
+  and content part — in the normalized crtx v0.1 envelope shape, the
+  universal escape hatch stem guarantees. It addresses the session by
+  id, requests JSON, and expects the envelope as a single stdout
+  document with turn-level state readable as typed fields and a clean
+  zero exit.
+steps:
+  - id: show_json
+    intent: |
+      Emit the addressed session's crtx envelope verbatim on stdout
+      so the consumer can read crtx_version, source, and per-turn
+      role/content without any wrapper to unwrap.
+    invoke: ["stem", "sessions", "show", "0198aa00-1111-7abc-8def-123456789abc", "--format", "json"]
+    capture: [exit_code, stdout, stderr]

@@ -1,0 +1,62 @@
+{
+  "scenario_id": "contract-surfaces",
+  "schema_version": "1",
+  "verdict": "pass",
+  "scored_at": "2026-08-08T23:28:55.493155Z",
+  "grader_version": "1.0.0",
+  "rules_version": "2026.05.12.1",
+  "tier": 3,
+  "facets": [
+    {
+      "factor": 5,
+      "status": "pass"
+    },
+    {
+      "factor": 11,
+      "status": "pass"
+    }
+  ],
+  "assertions": [
+    {
+      "id": "capabilities-machine-readable",
+      "kind": "capability_roundtrip",
+      "factor": 5,
+      "status": "pass",
+      "observed": 6,
+      "expected": "capabilities roundtrip OK"
+    },
+    {
+      "id": "capabilities-exit-zero",
+      "kind": "exit_code_equals",
+      "factor": 11,
+      "status": "pass",
+      "observed": 0,
+      "expected": 0
+    },
+    {
+      "id": "api-version-pin-honored",
+      "kind": "exit_code_equals",
+      "factor": 5,
+      "status": "pass",
+      "observed": 0,
+      "expected": 0
+    },
+    {
+      "id": "format-contract-enforced",
+      "kind": "stderr_contains",
+      "factor": 5,
+      "status": "pass",
+      "expected": "invalid --format"
+    },
+    {
+      "id": "format-refusal-usage-class",
+      "kind": "exit_code_class",
+      "factor": 11,
+      "status": "pass",
+      "observed": 2,
+      "expected": [
+        "USAGE"
+      ]
+    }
+  ]
+}

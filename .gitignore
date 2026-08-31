@@ -1,0 +1,41 @@
+# Binaries
+/stem
+bin/
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Go test artifacts
+*.test
+*.out
+coverage.out
+
+# Go workspace
+go.work
+go.work.sum
+
+# Future TS
+node_modules/
+dist/
+
+# Future Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+
+# Future Rust
+/target
+
+# IDE / editor
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Local agent/task state (tlc) — never ship.
+.tlc/
+
+# Runtime log dumps from tools/parity and emitter runs.
+logs/

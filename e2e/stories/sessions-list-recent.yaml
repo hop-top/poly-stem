@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/hop-top/kit/main/contracts/story-schema.json
+schema_version: "1"
+story_id: stem.sessions.list-recent-overview
+title: Review recent agent sessions across every CLI
+binary: stem
+intent: |
+  A developer returning to their machine after a busy week wants one
+  view of the agent sessions they ran, regardless of which CLI
+  produced them. They run stem sessions list and scan the newest-first
+  table — source, timestamp, working directory, derived title — to
+  re-orient before picking up where they left off.
+preconditions:
+  - stem binary is on PATH
+steps:
+  - id: overview
+    intent: |
+      Print the deduplicated session table, newest first, across the
+      crtx session roots and the Claude Code, Codex, and Copilot native
+      stores. The developer reads the SOURCE and TITLE columns to spot
+      the session they are trying to recall.
+    invoke: ["stem", "sessions", "list"]
+    capture: [exit_code, stdout]
+references:
+  - title: stem sessions command group spec
+    url: https://github.com/hop-top/poly-stem/blob/main/docs/specs/sessions-cli.md

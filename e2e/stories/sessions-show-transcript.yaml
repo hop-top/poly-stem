@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/hop-top/kit/main/contracts/story-schema.json
+schema_version: "1"
+story_id: stem.sessions.show-transcript
+title: Reread one session turn by turn
+binary: stem
+intent: |
+  Having spotted a session in the list, a developer wants to reread
+  what actually happened in it. They address the session by the
+  8-character id prefix shown in the table — full UUIDs are hostile to
+  human recall — and read the header plus each turn's role and
+  content, with thinking collapsed and tool payloads previewed.
+preconditions:
+  - a session id prefix was taken from stem sessions list output
+steps:
+  - id: show
+    intent: |
+      Print the session transcript: header with id, source,
+      timestamps, working directory, and lineage pointers, followed by
+      every turn in order. The developer rereads the exchange to
+      recover the decision they came looking for.
+    invoke: ["stem", "sessions", "show", "0198f2d4"]
+    capture: [exit_code, stdout]
+references:
+  - title: stem sessions command group spec
+    url: https://github.com/hop-top/poly-stem/blob/main/docs/specs/sessions-cli.md

@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/hop-top/kit/main/contracts/story-schema.json
+schema_version: "1"
+story_id: stem.conformance.contract-surfaces
+title: Discover and rely on stem's declared contracts
+binary: stem
+intent: |
+  Before delegating work, an orchestrator probes what stem may do:
+  it fetches the machine-readable capability listing to learn every
+  invocable leaf, pins the API schema version it was built against,
+  and expects an undeclared output format to be refused loudly — the
+  declared text|json contract must be enforced, never silently
+  coerced.
+steps:
+  - id: capabilities_probe
+    intent: |
+      Fetch the capability document and discover the invocable leaf
+      set — paths, contracts, flags — without scraping help text.
+    invoke: ["stem", "capabilities", "--format", "json"]
+    capture: [exit_code, stdout, stderr]
+  - id: api_version_ok
+    intent: |
+      Pin the schema version the orchestrator understands and expect
+      the pinned invocation to succeed unchanged.
+    invoke: ["stem", "sessions", "list", "--api-version", "1.0", "--format", "json"]
+    capture: [exit_code, stdout, stderr]
+  - id: format_refused
+    intent: |
+      Request a format outside the declared text|json contract and
+      expect an explicit usage refusal naming the accepted values.
+    invoke: ["stem", "sessions", "list", "--format", "xml"]
+    capture: [exit_code, stdout, stderr]

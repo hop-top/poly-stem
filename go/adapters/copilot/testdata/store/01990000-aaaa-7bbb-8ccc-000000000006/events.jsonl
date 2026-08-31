@@ -1,0 +1,2 @@
+{"id":"a6000000-0000-4000-8000-000000000001","timestamp":"2026-08-06T11:00:00.000Z","parentId":null,"type":"user.message","data":{"content":"orphan store"}}
+{"id":"a6000000-0000-4000-8000-000000000002","timestamp":"2026-08-06T11:00:01.000Z","parentId":"a6000000-0000-4000-8000-000000000001","type":"assistant.message","data":{"messageId":"m_001","content":"Recovered."}}

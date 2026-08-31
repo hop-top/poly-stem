@@ -1,0 +1,2 @@
+stem sessions list: invalid --format "xml": use text or json
+hint: every sessions leaf accepts --format text|json (default text)

@@ -1,0 +1,59 @@
+schema_version: "1"
+scenario_id: search-repeat-read
+description: >-
+  Re-issued search converges: the identical query exits clean twice
+  and returns the same match set — same count, same top session — so
+  blind retries are safe on the read-only surface.
+binary: stem
+factor_coverage: [3, 7]
+tier: 3
+story_ref:
+  story_id: stem.conformance.search-repeat-read
+  story_path: stories/search-repeat-read.yaml
+  content_hash: "sha256:1bed0642f6daa82846ef5f45a50c51e8b6b91f05a8917bddab1e22d7464e7204"
+steps:
+  - id: search_first
+    invoke: ["stem", "sessions", "search", "retrieval", "--format", "json"]
+    capture: [exit_code, stdout, stderr]
+  - id: search_again
+    invoke: ["stem", "sessions", "search", "retrieval", "--format", "json"]
+    capture: [exit_code, stdout, stderr]
+assertions:
+  - id: first-read-clean
+    kind: exit_code_equals
+    on: search_first
+    factor: 7
+    value: 0
+  - id: repeat-read-clean
+    kind: exit_code_equals
+    on: search_again
+    factor: 7
+    value: 0
+  - id: match-count-stable-first
+    kind: output_field_count
+    on: search_first
+    factor: 7
+    path: "matches"
+    equals: 2
+  - id: match-count-stable-again
+    kind: output_field_count
+    on: search_again
+    factor: 7
+    path: "matches"
+    equals: 2
+  - id: top-match-stable-first
+    kind: output_field_equals
+    on: search_first
+    factor: 7
+    path: "matches.0.session.id"
+    value: "0198bb00-2222-7abc-8def-aabbccddeeff"
+  - id: top-match-stable-again
+    kind: output_field_equals
+    on: search_again
+    factor: 7
+    path: "matches.0.session.id"
+    value: "0198bb00-2222-7abc-8def-aabbccddeeff"
+  - id: repeat-read-structured
+    kind: stream_discipline_pass
+    on: search_again
+    factor: 3

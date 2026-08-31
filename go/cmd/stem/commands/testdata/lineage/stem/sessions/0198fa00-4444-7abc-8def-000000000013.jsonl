@@ -1,0 +1,1 @@
+{"crtx_version":"0.1","id":"0198fa00-4444-7abc-8def-000000000013","created_at":"2026-08-06T08:00:00Z","updated_at":"2026-08-06T08:05:00Z","source":{"kind":"stem","version":"0.5.0"},"turns":[{"id":"t_s_1","role":"user","created_at":"2026-08-06T08:00:00Z","content":[{"type":"text","text":"standalone scratch session"}]}],"metadata":{"top.hop.stem.cwd":"/home/dev/scratch"}}

@@ -1,0 +1,2 @@
+{"timestamp":"2026-08-03T00:00:01.000Z","type":"response_item","payload":{"type":"message","role":"user","content":[{"type":"input_text","text":"meta line lost to corruption"}]}}
+{"timestamp":"2026-08-03T00:00:02.000Z","type":"response_item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"still recoverable"}]}}

@@ -1,0 +1,53 @@
+{
+  "scenario_id": "read-only-surface",
+  "schema_version": "1",
+  "verdict": "pass",
+  "scored_at": "2026-08-08T23:28:55.632109Z",
+  "grader_version": "1.0.0",
+  "rules_version": "2026.05.12.1",
+  "tier": 3,
+  "facets": [
+    {
+      "factor": 5,
+      "status": "pass"
+    },
+    {
+      "factor": 6,
+      "status": "pass"
+    }
+  ],
+  "assertions": [
+    {
+      "id": "capability-surface-present",
+      "kind": "output_field_present",
+      "factor": 5,
+      "status": "pass",
+      "observed": "leaves.0.path",
+      "expected": "present"
+    },
+    {
+      "id": "no-mutating-leaves",
+      "kind": "output_field_count",
+      "factor": 6,
+      "status": "pass",
+      "observed": 0,
+      "expected": 0
+    },
+    {
+      "id": "no-leaf-requires-preview",
+      "kind": "output_field_count",
+      "factor": 6,
+      "status": "pass",
+      "observed": 0,
+      "expected": 0
+    },
+    {
+      "id": "surface-declares-idempotent-reads",
+      "kind": "output_field_count",
+      "factor": 6,
+      "status": "pass",
+      "observed": 0,
+      "expected": 0
+    }
+  ]
+}

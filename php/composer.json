@@ -1,0 +1,56 @@
+{
+    "name": "hop-top/stem",
+    "description": "PHP SDK for stem, the polyglot AI agent runtime. crtx v0.1 envelopes.",
+    "type": "library",
+    "license": "MIT",
+    "homepage": "https://hop.top/stem",
+    "authors": [
+        {"name": "Idea Crafters LLC", "email": "lab@ideacrafters.com"},
+        {"name": "Jad Bitar"},
+        {"name": "Monaam Benhouria"}
+    ],
+    "keywords": [
+        "agent",
+        "agent-sessions",
+        "agent-runtime",
+        "multi-agent",
+        "envelope",
+        "conversation-history",
+        "tool-use",
+        "llm",
+        "crtx",
+        "stem",
+        "claude-code",
+        "codex",
+        "gemini-cli",
+        "opencode",
+        "openhands",
+        "mcp"
+    ],
+    "support": {
+        "issues": "https://github.com/hop-top/poly-stem/issues",
+        "source": "https://github.com/hop-top/poly-stem/tree/main/php"
+    },
+    "require": {
+        "php": ">=8.2"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "HopTop\\Stem\\": "src/"
+        },
+        "files": [
+            "src/functions.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "HopTop\\Stem\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    }
+}

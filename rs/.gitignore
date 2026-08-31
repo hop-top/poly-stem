@@ -1,0 +1,17 @@
+# Build outputs
+/target/
+**/target/
+**/*.rs.bk
+*.profraw
+*.profdata
+
+# Sample runtime output
+**/session.jsonl
+
+# Local workspace/editor noise
+.DS_Store
+.idea/
+.vscode/
+
+# Cargo.lock is committed for the SDK crate and binary examples.
+!Cargo.lock

@@ -1,0 +1,8 @@
+xrr: "1"
+adapter: http
+fingerprint: 52aafb57
+recorded_at: "2026-05-30T02:13:25Z"
+payload:
+    method: POST
+    url: https://api.tavily.com/search
+    body: '{"api_key":"replay-mode-no-key-required","max_results":3,"query":"latest stable Go release version"}'

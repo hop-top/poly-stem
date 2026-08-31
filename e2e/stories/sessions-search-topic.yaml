@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/hop-top/kit/main/contracts/story-schema.json
+schema_version: "1"
+story_id: stem.sessions.search-topic-recall
+title: Recall which session discussed a topic
+binary: stem
+intent: |
+  A developer knows an agent session touched a topic — a feature name,
+  an error message, a library — but cannot remember when or in which
+  CLI. They search across every known session for the phrase and read
+  the grep-like hit list, grouped per session with collapsed snippets,
+  to find the conversation they are thinking of.
+steps:
+  - id: search
+    intent: |
+      Find every session whose turn content or metadata contains the
+      phrase, newest session first. The developer scans the snippets
+      to recognize the conversation, then notes the id prefix in the
+      first column for follow-up.
+    invoke: ["stem", "sessions", "search", "rate limiting"]
+    capture: [exit_code, stdout]
+references:
+  - title: stem sessions command group spec
+    url: https://github.com/hop-top/poly-stem/blob/main/docs/specs/sessions-cli.md

@@ -1,0 +1,9 @@
+xrr: "1"
+adapter: http
+fingerprint: 33794ea9
+recorded_at: "2026-05-30T02:13:25Z"
+payload:
+    status: 200
+    headers:
+        Content-Type: application/json
+    body: '{"id":"msg_synth_ws_2","type":"message","role":"assistant","model":"claude-sonnet-4-6-20260415","content":[{"type":"text","text":"The latest stable Go release is Go 1.24, released in February 2025. It introduced features like generic type aliases, weak pointers, and a new tools directive for go.mod. The previous stable line is Go 1.23.x."}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":280,"output_tokens":72}}'

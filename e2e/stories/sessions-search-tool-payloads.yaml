@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/hop-top/kit/main/contracts/story-schema.json
+schema_version: "1"
+story_id: stem.sessions.search-regex-tool-payloads
+title: Search tool payloads with a regular expression
+binary: stem
+intent: |
+  A developer hunting for the session where an agent edited a specific
+  file needs to look inside tool activity, which the default content
+  scope leaves out as high-noise. They extend the scope to tool_call
+  input and tool_result output and match with an RE2 pattern, so path
+  variants land in one query.
+preconditions:
+  - agent sessions with tool activity were recorded on this machine
+steps:
+  - id: tool_regex
+    intent: |
+      Match the pattern against turn content extended with tool_call
+      input and tool_result output. The developer reads the per-hit
+      snippets to confirm which session touched the file in question.
+    invoke: ["stem", "sessions", "search", "handlers?/rate", "--regex", "--tools"]
+    capture: [exit_code, stdout]
+references:
+  - title: stem sessions command group spec
+    url: https://github.com/hop-top/poly-stem/blob/main/docs/specs/sessions-cli.md

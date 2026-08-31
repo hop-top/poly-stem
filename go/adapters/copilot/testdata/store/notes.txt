@@ -1,0 +1,2 @@
+Not a session file; discovery must ignore non-jsonl entries and
+directories without an events.jsonl (see no-events-here/).

@@ -1,0 +1,1 @@
+{"error":{"code":"not_found","message":"no session matches id \"deadbeef\"","hint":"run `stem sessions list` to see known sessions"}}

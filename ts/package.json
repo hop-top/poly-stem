@@ -1,0 +1,58 @@
+{
+  "name": "@hop-top/stem",
+  "version": "0.0.0",
+  "description": "Polyglot AI agent runtime — crtx v0.1 envelope SDK (TypeScript).",
+  "license": "MIT",
+  "author": "Idea Crafters LLC <lab@ideacrafters.com>",
+  "contributors": [
+    "Jad Bitar",
+    "Monaam Benhouria"
+  ],
+  "homepage": "https://hop.top/stem",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hop-top/poly-stem.git",
+    "directory": "ts"
+  },
+  "bugs": {
+    "url": "https://github.com/hop-top/poly-stem/issues"
+  },
+  "keywords": [
+    "agent",
+    "agent-sessions",
+    "agent-runtime",
+    "multi-agent",
+    "envelope",
+    "conversation-history",
+    "tool-use",
+    "llm",
+    "crtx",
+    "stem",
+    "claude-code",
+    "codex",
+    "gemini-cli",
+    "opencode",
+    "openhands",
+    "mcp"
+  ],
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "ci:build": "pnpm install --ignore-scripts && pnpm build",
+    "test": "pnpm dlx --allow-build=esbuild vitest@2.1.8 run",
+    "lint": "node -e \"process.exit(0)\""
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.8"
+  }
+}

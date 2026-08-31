@@ -1,0 +1,22 @@
+schema_version: "1"
+binary: stem
+binary_version: 4d3c03e
+recorder: xrr
+recorder_version: 0.1.0-alpha.3
+recorded_at: 2026-08-08T23:28:38Z
+scenario_id: stem/contract-surfaces
+scenario_version: 1.0.0
+story_ref:
+  story_id: stem.conformance.contract-surfaces
+  story_path: story.yaml
+  content_hash: sha256:58051dbcd51d141551830d026a1fe07b2d964865d88397d4af1ada7c518f9a1b
+steps:
+  - id: capabilities_probe
+    cassette_dir: steps/capabilities_probe/cassette
+    captures: steps/capabilities_probe
+  - id: api_version_ok
+    cassette_dir: steps/api_version_ok/cassette
+    captures: steps/api_version_ok
+  - id: format_refused
+    cassette_dir: steps/format_refused/cassette
+    captures: steps/format_refused

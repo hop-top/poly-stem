@@ -1,0 +1,16 @@
+schema_version: "1"
+binary: stem
+binary_version: 4d3c03e
+recorder: xrr
+recorder_version: 0.1.0-alpha.3
+recorded_at: 2026-08-08T23:28:38Z
+scenario_id: stem/sessions-show-envelope
+scenario_version: 1.0.0
+story_ref:
+  story_id: stem.conformance.sessions-show-envelope
+  story_path: story.yaml
+  content_hash: sha256:068433bdaf5ae7d424552f1a92d8d71ea244eee4e8b228614405dde5911d4ca1
+steps:
+  - id: show_json
+    cassette_dir: steps/show_json/cassette
+    captures: steps/show_json

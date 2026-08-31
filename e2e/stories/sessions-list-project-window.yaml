@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/hop-top/kit/main/contracts/story-schema.json
+schema_version: "1"
+story_id: stem.sessions.list-project-time-window
+title: Narrow the session list to one project and a time window
+binary: stem
+intent: |
+  A developer remembers doing agent work in a particular repository
+  sometime in the last week, but not which CLI ran it. They scope the
+  list to the repository path and a relative time window, so the
+  result is the handful of sessions whose working directory sits under
+  the project and whose activity touched the window.
+preconditions:
+  - agent sessions were recorded on this machine
+steps:
+  - id: scoped
+    intent: |
+      List only the sessions whose recorded working directory equals
+      the project path or lies under it, restricted to activity within
+      the last seven days. The developer picks the session to reopen
+      from this shortlist.
+    invoke: ["stem", "sessions", "list", "--cwd", "~/code/acme", "--since", "7d"]
+    capture: [exit_code, stdout]
+references:
+  - title: stem sessions command group spec
+    url: https://github.com/hop-top/poly-stem/blob/main/docs/specs/sessions-cli.md

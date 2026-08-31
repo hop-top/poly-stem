@@ -1,0 +1,222 @@
+name: stem
+schema_version: "1"
+
+state_introspection:
+  config_commands:
+    - stem status
+    - stem sessions list
+  env_vars:
+    # Scan-root overrides for the sessions group; colon-separated
+    # directory lists, empty entries dropped (docs/specs/sessions-cli.md §1.1).
+    - STEM_CRTX_DIRS
+    - STEM_CLAUDECODE_DIRS
+    - STEM_CODEX_DIRS
+    - STEM_COPILOT_DIRS
+    # Honored by the adapters when resolving default store roots.
+    - CODEX_HOME
+    - COPILOT_HOME
+    - XDG_STATE_HOME
+
+commands:
+  - name: status
+    intent:
+      domain: diagnostics
+      category: query
+      tags: [overview, runtime]
+    contract:
+      idempotent: true
+      retryable: true
+    safety:
+      level: safe
+    flags:
+      - name: --config
+        short: -c
+        type: string
+        description: Layer extra config (repeatable)
+      - name: --chdir
+        short: -C
+        type: string
+        description: Change directory before running
+    suggested_next:
+      - sessions list
+
+  - name: sessions
+    intent:
+      domain: sessions
+      category: query
+      tags: [crtx, recall, cross-cli]
+    contract:
+      idempotent: true
+      retryable: true
+    safety:
+      level: safe
+    children:
+      - name: list
+        intent:
+          domain: sessions
+          category: query
+          tags: [enumerate, recall]
+        contract:
+          idempotent: true
+          retryable: true
+        safety:
+          level: safe
+        output_schema:
+          format: text|json
+          contract: contracts/sessions/list.yaml
+          fields:
+            - sessions[] (SessionSummary)
+            - truncated
+        flags:
+          - name: --format
+            type: string
+            description: Output format, text or json (default text)
+          - name: --since
+            type: string
+            description: Keep sessions whose activity intersects the window from this time (RFC 3339, YYYY-MM-DD, or <N>h/<N>d/<N>w)
+          - name: --until
+            type: string
+            description: Upper bound of the time window (same forms; default now)
+          - name: --cwd
+            type: string
+            description: Keep sessions whose working directory equals this path or lies under it
+          - name: --source
+            type: string
+            description: Keep sessions whose source kind matches (repeatable)
+          - name: --limit
+            type: int
+            description: Cap result count after sorting (0 = unlimited; default 20)
+          - name: --nested
+            type: bool
+            description: Include dispatch-nested sub-agent sessions
+          - name: --config
+            short: -c
+            type: string
+            description: Layer extra config (repeatable)
+          - name: --chdir
+            short: -C
+            type: string
+            description: Change directory before running
+        suggested_next:
+          - sessions show
+          - sessions search
+      - name: search
+        intent:
+          domain: sessions
+          category: query
+          tags: [content, metadata, recall]
+        contract:
+          idempotent: true
+          retryable: true
+        safety:
+          level: safe
+        output_schema:
+          format: text|json
+          contract: contracts/sessions/search.yaml
+          fields:
+            - query
+            - matches[] (session + hits)
+            - truncated
+        flags:
+          - name: --format
+            type: string
+            description: Output format, text or json (default text)
+          - name: --since
+            type: string
+            description: Keep sessions whose activity intersects the window from this time (RFC 3339, YYYY-MM-DD, or <N>h/<N>d/<N>w)
+          - name: --until
+            type: string
+            description: Upper bound of the time window (same forms; default now)
+          - name: --cwd
+            type: string
+            description: Keep sessions whose working directory equals this path or lies under it
+          - name: --source
+            type: string
+            description: Keep sessions whose source kind matches (repeatable)
+          - name: --limit
+            type: int
+            description: Cap result count after sorting (0 = unlimited; default 20)
+          - name: --regex
+            type: bool
+            description: Treat the query as an RE2 regular expression
+          - name: --case-sensitive
+            type: bool
+            description: Match with literal case (either mode)
+          - name: --scope
+            type: string
+            description: Search scope, content, metadata, or all (default all)
+          - name: --role
+            type: string
+            description: Restrict content matches to turns of this role
+          - name: --tools
+            type: bool
+            description: Include tool_call input and tool_result output in the content scope
+          - name: --config
+            short: -c
+            type: string
+            description: Layer extra config (repeatable)
+          - name: --chdir
+            short: -C
+            type: string
+            description: Change directory before running
+        suggested_next:
+          - sessions show
+      - name: show
+        intent:
+          domain: sessions
+          category: query
+          tags: [transcript, envelope]
+        contract:
+          idempotent: true
+          retryable: true
+        safety:
+          level: safe
+        output_schema:
+          format: text|json
+          contract: contracts/sessions/show.yaml
+          fields:
+            - crtx v0.1 Envelope, verbatim (json)
+        flags:
+          - name: --format
+            type: string
+            description: Output format, text or json (default text)
+          - name: --config
+            short: -c
+            type: string
+            description: Layer extra config (repeatable)
+          - name: --chdir
+            short: -C
+            type: string
+            description: Change directory before running
+        suggested_next:
+          - sessions lineage
+      - name: lineage
+        intent:
+          domain: sessions
+          category: query
+          tags: [fork, dispatch, continuation]
+        contract:
+          idempotent: true
+          retryable: true
+        safety:
+          level: safe
+        output_schema:
+          format: text|json
+          contract: contracts/sessions/lineage.yaml
+          fields:
+            - target
+            - nodes[] (id, parent, relation, fork_point, call_id, resolved, summary)
+        flags:
+          - name: --format
+            type: string
+            description: Output format, text or json (default text)
+          - name: --config
+            short: -c
+            type: string
+            description: Layer extra config (repeatable)
+          - name: --chdir
+            short: -C
+            type: string
+            description: Change directory before running
+        suggested_next:
+          - sessions show

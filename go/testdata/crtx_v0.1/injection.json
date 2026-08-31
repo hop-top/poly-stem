@@ -1,0 +1,66 @@
+{
+  "crtx_version": "0.1",
+  "id": "01JCRTX0INJECTIONEXAMPLE0001",
+  "created_at": "2026-05-30T11:00:00Z",
+  "updated_at": "2026-05-30T11:00:09Z",
+  "source": {
+    "kind": "stem",
+    "version": "0.1.0",
+    "instance": "user-session-host"
+  },
+  "injected_turns": [
+    {
+      "envelope_id": "01JCRTX0PRIORSESSION00000XYZ1",
+      "start_turn_id": "01JCRTX0PRIORTURN0004",
+      "end_turn_id": "01JCRTX0PRIORTURN0007"
+    },
+    {
+      "envelope_id": "01JCRTX0PRIORSESSION00000XYZ2",
+      "start_turn_id": "01JCRTX0OTHERTURN0012",
+      "end_turn_id": "01JCRTX0OTHERTURN0012",
+      "injected_after_turn_id": "01JCRTX0LOCALTURN0002"
+    }
+  ],
+  "turns": [
+    {
+      "id": "01JCRTX0LOCALTURN0001",
+      "role": "user",
+      "created_at": "2026-05-30T11:00:00Z",
+      "content": [
+        { "type": "text", "text": "Continue from yesterday's session. Context attached." }
+      ]
+    },
+    {
+      "id": "01JCRTX0LOCALTURN0002",
+      "role": "assistant",
+      "created_at": "2026-05-30T11:00:01Z",
+      "content": [
+        { "type": "text", "text": "Got it — picking up where we left off on the retry implementation." }
+      ]
+    },
+    {
+      "id": "01JCRTX0LOCALTURN0003",
+      "role": "system",
+      "created_at": "2026-05-30T11:00:05Z",
+      "content": [
+        { "type": "text", "text": "/import 01JCRTX0PRIORSESSION00000XYZ2#01JCRTX0OTHERTURN0012" }
+      ]
+    },
+    {
+      "id": "01JCRTX0LOCALTURN0004",
+      "role": "user",
+      "created_at": "2026-05-30T11:00:06Z",
+      "content": [
+        { "type": "text", "text": "Apply the same pattern from the imported turn to T-NNNN's retry path." }
+      ]
+    },
+    {
+      "id": "01JCRTX0LOCALTURN0005",
+      "role": "assistant",
+      "created_at": "2026-05-30T11:00:09Z",
+      "content": [
+        { "type": "text", "text": "Done. Pattern from imported turn applied to T-NNNN." }
+      ]
+    }
+  ]
+}
