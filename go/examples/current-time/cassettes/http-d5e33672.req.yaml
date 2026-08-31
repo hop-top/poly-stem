@@ -1,0 +1,8 @@
+xrr: "1"
+adapter: http
+fingerprint: d5e33672
+recorded_at: "2026-05-30T02:09:32Z"
+payload:
+    method: POST
+    url: https://api.anthropic.com/v1/messages
+    body: '{"max_tokens":1024,"messages":[{"content":[{"text":"What time is it?","type":"text"}],"role":"user"}],"model":"claude-sonnet-4-6","tools":[{"input_schema":{"properties":{},"required":[],"type":"object"},"name":"current_time","description":"Returns the current UTC time as an ISO 8601 string."}]}'

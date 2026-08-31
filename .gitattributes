@@ -1,0 +1,31 @@
+# Default: text files normalize to LF, binary detection is automatic.
+* text=auto eol=lf
+
+# Explicit text formats — collapse cross-platform CRLF noise.
+*.go          text eol=lf
+*.md          text eol=lf
+*.mdx         text eol=lf
+*.yaml        text eol=lf
+*.yml         text eol=lf
+*.json        text eol=lf
+*.toml        text eol=lf
+*.ts          text eol=lf
+*.tsx         text eol=lf
+*.js          text eol=lf
+*.jsx         text eol=lf
+*.py          text eol=lf
+*.sh          text eol=lf
+Makefile      text eol=lf
+
+# Explicit binary — never line-end-translate or diff.
+*.png         binary
+*.jpg         binary
+*.jpeg        binary
+*.gif         binary
+*.ico         binary
+*.pdf         binary
+*.zip         binary
+
+# Vendored docs / templates — exclude from language stats.
+docs/**            linguist-documentation=true
+spec/**            linguist-documentation=true

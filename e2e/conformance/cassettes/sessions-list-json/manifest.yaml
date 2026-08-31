@@ -1,0 +1,19 @@
+schema_version: "1"
+binary: stem
+binary_version: 4d3c03e
+recorder: xrr
+recorder_version: 0.1.0-alpha.3
+recorded_at: 2026-08-08T23:28:38Z
+scenario_id: stem/sessions-list-json
+scenario_version: 1.0.0
+story_ref:
+  story_id: stem.conformance.sessions-list-json
+  story_path: story.yaml
+  content_hash: sha256:c73452c3ec489bd328c4931e84114168b4f69e31cb236033b5c97b0f42d92f00
+steps:
+  - id: list_json
+    cassette_dir: steps/list_json/cassette
+    captures: steps/list_json
+  - id: lineage_json
+    cassette_dir: steps/lineage_json/cassette
+    captures: steps/lineage_json

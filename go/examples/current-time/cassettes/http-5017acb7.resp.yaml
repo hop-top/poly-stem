@@ -1,0 +1,9 @@
+xrr: "1"
+adapter: http
+fingerprint: 5017acb7
+recorded_at: "2026-05-30T02:09:32Z"
+payload:
+    status: 200
+    headers:
+        Content-Type: application/json
+    body: '{"id":"msg_synth_2","type":"message","role":"assistant","model":"claude-sonnet-4-6-20260415","content":[{"type":"text","text":"The current UTC time is 2026-01-01T00:00:00Z."}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":120,"output_tokens":18}}'

@@ -1,0 +1,5 @@
+          
+   ERROR  
+          
+  Usage: unknown flag: --bogus-flag — run `stem sessions list --help` for accepted flags.                             
+

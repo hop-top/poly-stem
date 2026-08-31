@@ -1,0 +1,4 @@
+/vendor/
+composer.lock
+session.jsonl
+.phpunit.result.cache

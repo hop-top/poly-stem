@@ -1,0 +1,27 @@
+# stem sessions pack — structured error document shape.
+# Pins docs/specs/sessions-cli.md §3.6: on failure with --format
+# json, stderr carries exactly one document of this shape and stdout
+# stays empty. `candidates` inside details (ambiguous_id) reuses the
+# SessionSummary shape pinned by list.yaml.
+name: stem-sessions-error-json-0.1
+provider: stem
+evaluators:
+  - name: json_schema_valid
+    mode: binary
+    schema:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code: { enum: [not_found, ambiguous_id, usage, internal] }
+            message: { type: string, minLength: 1 }
+            hint: { type: string }
+            details:
+              type: object
+              properties:
+                candidates:
+                  type: array
+                  maxItems: 10

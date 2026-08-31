@@ -1,0 +1,9 @@
+xrr: "1"
+adapter: http
+fingerprint: d5e33672
+recorded_at: "2026-05-30T02:09:32Z"
+payload:
+    status: 200
+    headers:
+        Content-Type: application/json
+    body: '{"id":"msg_synth_1","type":"message","role":"assistant","model":"claude-sonnet-4-6-20260415","content":[{"type":"tool_use","id":"toolu_synth_time_1","name":"current_time","input":{}}],"stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":100,"output_tokens":24}}'

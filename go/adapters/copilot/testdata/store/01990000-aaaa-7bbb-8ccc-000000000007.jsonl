@@ -1,0 +1,2 @@
+{"id":"a8000000-0000-4000-8000-000000000001","timestamp":"2026-08-07T10:00:00.000Z","parentId":null,"type":"session.start","data":{"sessionId":"01990000-aaaa-7bbb-8ccc-000000000007","version":1,"producer":"copilot-agent","copilotVersion":"1.0.15","startTime":"2026-08-07T10:00:00.000Z","context":{"cwd":"/home/dev/dup"}}}
+{"id":"a8000000-0000-4000-8000-000000000002","timestamp":"2026-08-07T10:00:01.000Z","parentId":"a8000000-0000-4000-8000-000000000001","type":"user.message","data":{"content":"legacy shadow"}}

@@ -1,0 +1,19 @@
+schema_version: "1"
+binary: stem
+binary_version: 4d3c03e
+recorder: xrr
+recorder_version: 0.1.0-alpha.3
+recorded_at: 2026-08-08T23:28:38Z
+scenario_id: stem/search-repeat-read
+scenario_version: 1.0.0
+story_ref:
+  story_id: stem.conformance.search-repeat-read
+  story_path: story.yaml
+  content_hash: sha256:1bed0642f6daa82846ef5f45a50c51e8b6b91f05a8917bddab1e22d7464e7204
+steps:
+  - id: search_first
+    cassette_dir: steps/search_first/cassette
+    captures: steps/search_first
+  - id: search_again
+    cassette_dir: steps/search_again/cassette
+    captures: steps/search_again

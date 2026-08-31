@@ -1,0 +1,15 @@
+{"timestamp":"2026-08-01T10:00:00.100Z","type":"session_meta","payload":{"id":"01900000-0000-7000-8000-00000000000a","session_id":"01900000-0000-7000-8000-00000000000a","timestamp":"2026-08-01T10:00:00.000Z","cwd":"/home/dev/acme","originator":"codex-tui","cli_version":"0.145.0","source":"cli","thread_source":"user","model_provider":"openai","history_mode":null,"context_window":272000,"base_instructions":{"text":"You are a coding agent."},"git":{"commit_hash":"deadbeefdeadbeefdeadbeefdeadbeefdeadbeef","branch":"main","repository_url":"https://example.com/acme/repo.git"}}}
+{"timestamp":"2026-08-01T10:00:00.200Z","type":"turn_context","payload":{"cwd":"/home/dev/acme","model":"gpt-5","approval_policy":"on-request","sandbox_policy":{"mode":"workspace-write"}}}
+{"timestamp":"2026-08-01T10:00:00.300Z","type":"event_msg","payload":{"type":"task_started","model_context_window":272000}}
+{"timestamp":"2026-08-01T10:00:01.000Z","type":"response_item","payload":{"type":"message","role":"developer","content":[{"type":"input_text","text":"<permissions instructions>synthetic sandbox rules</permissions>"}]}}
+{"timestamp":"2026-08-01T10:00:02.000Z","type":"response_item","payload":{"type":"message","role":"user","content":[{"type":"input_text","text":"add rate limiting to the api"},{"type":"input_text","text":"<environment_context><cwd>/home/dev/acme</cwd></environment_context>"}]}}
+{"timestamp":"2026-08-01T10:00:03.000Z","type":"response_item","payload":{"type":"reasoning","id":"rs_1","summary":[{"type":"summary_text","text":"Plan the middleware."}],"encrypted_content":"opaque-blob"}}
+{"timestamp":"2026-08-01T10:00:04.000Z","type":"response_item","payload":{"type":"function_call","id":"fc_1","name":"exec_command","arguments":"{\"cmd\":\"ls\"}","call_id":"call_001"}}
+{"timestamp":"2026-08-01T10:00:05.000Z","type":"event_msg","payload":{"type":"token_count","info":null,"rate_limits":null}}
+{"timestamp":"2026-08-01T10:00:06.000Z","type":"response_item","payload":{"type":"function_call_output","call_id":"call_001","output":"Process exited with code 0\nmain.go"}}
+{"timestamp":"2026-08-01T10:00:07.000Z","type":"response_item","payload":{"type":"custom_tool_call","id":"ct_1","status":"completed","call_id":"call_002","name":"apply_patch","input":"*** Begin Patch synthetic *** End Patch"}}
+{"timestamp":"2026-08-01T10:00:08.000Z","type":"response_item","payload":{"type":"custom_tool_call_output","call_id":"call_002","output":"Done!"}}
+{"timestamp":"2026-08-01T10:00:09.000Z","type":"response_item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Rate limiting added."}]}}
+{"timestamp":"2026-08-01T10:00:09.500Z","type":"event_msg","payload":{"type":"agent_message","message":"Rate limiting added."}}
+{"timestamp":"2026-08-01T10:00:10.000Z","type":"world_state","payload":{"files":{}}}
+{"timestamp":"2026-08-01T10:00:11.000Z","type":"event_msg","payload":{"type":"task_complete","last_agent_message":"Rate limiting added."}}

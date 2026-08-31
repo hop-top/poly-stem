@@ -1,0 +1,38 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/hop-top/kit/main/contracts/story-schema.json
+schema_version: "1"
+story_id: stem.conformance.error-envelope-correction
+title: Recover from flawed invocations via corrective errors
+binary: stem
+intent: |
+  An agent mid-pipeline hits four different failure shapes: a session
+  id that matches nothing, a prefix that matches several sessions, a
+  flag the leaf does not declare, and a command that does not exist.
+  Each failure must come back as a corrective, class-accurate error —
+  structured code plus a hint naming the next action (list sessions,
+  lengthen the prefix, consult --help) — with not-found, conflict,
+  and usage exit codes the agent can branch on.
+steps:
+  - id: show_missing
+    intent: |
+      Address a session that does not exist and receive a structured
+      not-found error whose hint names the recovery command.
+    invoke: ["stem", "sessions", "show", "deadbeef", "--format", "json"]
+    capture: [exit_code, stdout, stderr]
+  - id: show_ambiguous
+    intent: |
+      Address several sessions with one short prefix and receive the
+      candidate list plus the retry-with-longer-prefix hint.
+    invoke: ["stem", "sessions", "show", "0198", "--format", "json"]
+    capture: [exit_code, stdout, stderr]
+  - id: unknown_flag
+    intent: |
+      Pass an undeclared flag and get a usage-class rejection that
+      points at the leaf's own --help.
+    invoke: ["stem", "sessions", "list", "--bogus-flag", "--format", "json"]
+    capture: [exit_code, stdout, stderr]
+  - id: unknown_command
+    intent: |
+      Invoke a command that does not exist and get a usage-class
+      rejection instead of help text masquerading as success.
+    invoke: ["stem", "frobnicate"]
+    capture: [exit_code, stdout, stderr]

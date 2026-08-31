@@ -1,0 +1,33 @@
+{
+    "name": "hop-top/stem-example-current-time",
+    "description": "Smallest viable stem PHP example: OpenAI + current_time tool, xrr-replayed.",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.2",
+        "hop-top/stem": "@dev",
+        "hop-top/xrr": "*",
+        "openai-php/client": "^0.19",
+        "guzzlehttp/guzzle": "^7.10",
+        "guzzlehttp/psr7": "^2.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "HopTop\\StemExample\\CurrentTime\\": "src/"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../..",
+            "options": { "symlink": true }
+        },
+        {
+            "type": "path",
+            "url": "../../../../../../poly-xrr/hops/main/php",
+            "options": { "symlink": true }
+        }
+    ]
+}

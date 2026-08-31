@@ -1,0 +1,9 @@
+xrr: "1"
+adapter: http
+fingerprint: a7d28353
+recorded_at: "2026-05-30T02:13:25Z"
+payload:
+    status: 200
+    headers:
+        Content-Type: application/json
+    body: '{"id":"msg_synth_ws_1","type":"message","role":"assistant","model":"claude-sonnet-4-6-20260415","content":[{"type":"text","text":"I''ll search the web for the latest stable Go release."},{"type":"tool_use","id":"toolu_synth_ws_1","name":"web_search","input":{"query":"latest stable Go release version"}}],"stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":150,"output_tokens":48}}'

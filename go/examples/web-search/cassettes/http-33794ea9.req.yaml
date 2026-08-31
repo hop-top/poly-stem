@@ -1,0 +1,8 @@
+xrr: "1"
+adapter: http
+fingerprint: 33794ea9
+recorded_at: "2026-05-30T02:13:25Z"
+payload:
+    method: POST
+    url: https://api.anthropic.com/v1/messages
+    body: '{"max_tokens":1024,"messages":[{"content":[{"text":"What''s the latest stable Go release?","type":"text"}],"role":"user"},{"content":[{"text":"I''ll search the web for the latest stable Go release.","type":"text"},{"id":"toolu_synth_ws_1","input":{"query":"latest stable Go release version"},"name":"web_search","type":"tool_use"}],"role":"assistant"},{"content":[{"tool_use_id":"toolu_synth_ws_1","is_error":false,"content":[{"text":"{\"query\":\"latest stable Go release version\",\"results\":[{\"title\":\"Go 1.24 Release Notes - The Go Programming Language\",\"url\":\"https://go.dev/doc/go1.24\",\"snippet\":\"Go 1.24 is the latest stable release of the Go programming language, released in February 2025. It introduces generic type aliases, weak pointers, and a new tools directive for go.mod.\"},{\"title\":\"Releases - Go\",\"url\":\"https://go.dev/dl/\",\"snippet\":\"The Go team announces stable releases at https://go.dev/dl/. The current stable release is Go 1.24.x; previous stable line is Go 1.23.x.\"},{\"title\":\"Go Release History\",\"url\":\"https://go.dev/doc/devel/release\",\"snippet\":\"Go follows a six-month release cadence. Recent stable releases: 1.24 (Feb 2025), 1.23 (Aug 2024), 1.22 (Feb 2024).\"}]}","type":"text"}],"type":"tool_result"}],"role":"user"}],"model":"claude-sonnet-4-6","tools":[{"input_schema":{"properties":{"query":{"description":"Search query string.","type":"string"}},"required":["query"],"type":"object"},"name":"web_search","description":"Run a web search and return the top results."}]}'

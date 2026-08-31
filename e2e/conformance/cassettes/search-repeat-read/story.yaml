@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/hop-top/kit/main/contracts/story-schema.json
+schema_version: "1"
+story_id: stem.conformance.search-repeat-read
+title: Re-issue a search and converge on the same results
+binary: stem
+intent: |
+  An agent retrying after a timeout re-issues the exact search it
+  already ran. Reads must be naturally idempotent: the repeated query
+  exits clean and returns the same matches in the same order — same
+  top session, same match count — so the agent can retry blindly
+  without diffing for side effects.
+steps:
+  - id: search_first
+    intent: |
+      Run the content search once and capture the structured match
+      set as the baseline.
+    invoke: ["stem", "sessions", "search", "retrieval", "--format", "json"]
+    capture: [exit_code, stdout, stderr]
+  - id: search_again
+    intent: |
+      Re-issue the identical search and expect byte-equivalent
+      semantics: clean exit, same match count, same top hit.
+    invoke: ["stem", "sessions", "search", "retrieval", "--format", "json"]
+    capture: [exit_code, stdout, stderr]

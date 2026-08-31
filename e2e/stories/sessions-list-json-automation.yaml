@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/hop-top/kit/main/contracts/story-schema.json
+schema_version: "1"
+story_id: stem.sessions.list-json-for-automation
+title: Consume the session list as JSON from an automation
+binary: stem
+intent: |
+  An automation builder indexing agent activity needs the same session
+  set the human table shows, but in a machine-readable shape. They
+  request JSON output so their consumer parses the structured document
+  pinned by the list contract instead of screen-scraping an aligned
+  table whose column widths are not a stable contract.
+steps:
+  - id: list_json
+    intent: |
+      Emit the full session list as one JSON document on stdout —
+      sessions array of summaries plus the truncated marker — with the
+      limit lifted so the consumer sees the whole set.
+    invoke: ["stem", "sessions", "list", "--format", "json", "--limit", "0"]
+    capture: [exit_code, stdout]
+references:
+  - title: list output contract
+    url: https://github.com/hop-top/poly-stem/blob/main/contracts/sessions/list.yaml

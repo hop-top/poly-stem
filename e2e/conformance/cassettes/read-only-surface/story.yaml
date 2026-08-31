@@ -1,0 +1,20 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/hop-top/kit/main/contracts/story-schema.json
+schema_version: "1"
+story_id: stem.conformance.read-only-surface
+title: Verify nothing on the surface can mutate state
+binary: stem
+intent: |
+  A safety-conscious agent about to run stem unattended checks the
+  capability document for anything that could change state. Every
+  leaf must declare a read side-effect and natural idempotency: with
+  no mutating operation on the surface there is nothing that would
+  require a preview, and the agent may invoke any leaf without a
+  dry-run checkpoint.
+steps:
+  - id: capabilities_probe
+    intent: |
+      Read the declared side-effect contract of every leaf and
+      confirm the surface is uniformly read-only — no leaf mutates,
+      so none needs a preview mode.
+    invoke: ["stem", "capabilities", "--format", "json"]
+    capture: [exit_code, stdout, stderr]

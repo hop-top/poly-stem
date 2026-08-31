@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/hop-top/kit/main/contracts/story-schema.json
+schema_version: "1"
+story_id: stem.conformance.sessions-list-json
+title: Enumerate and trace sessions as structured JSON
+binary: stem
+intent: |
+  An automation wiring stem into a larger recall pipeline needs the
+  full cross-CLI session set and one session's fork ancestry in a
+  machine-parseable shape. It requests JSON output and expects typed
+  session summaries — id, source, timestamps, store location — plus a
+  lineage chain whose fork relation is an inspectable field, with
+  nothing to screen-scrape and a clean zero exit.
+steps:
+  - id: list_json
+    intent: |
+      Render the deduplicated, newest-first session set as one JSON
+      document on stdout so a program can read each session's id,
+      source, recency, and backing store directly.
+    invoke: ["stem", "sessions", "list", "--format", "json"]
+    capture: [exit_code, stdout, stderr]
+  - id: lineage_json
+    intent: |
+      Walk the fork ancestry of one session and read the chain as
+      structured nodes whose parent/relation/fork-point fields expose
+      the lineage state without parsing prose.
+    invoke: ["stem", "sessions", "lineage", "0198bb00-2222-7abc-8def-aabbccddeeff", "--format", "json"]
+    capture: [exit_code, stdout, stderr]

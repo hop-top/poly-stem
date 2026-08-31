@@ -1,0 +1,8 @@
+xrr: "1"
+adapter: http
+fingerprint: a7d28353
+recorded_at: "2026-05-30T02:13:25Z"
+payload:
+    method: POST
+    url: https://api.anthropic.com/v1/messages
+    body: '{"max_tokens":1024,"messages":[{"content":[{"text":"What''s the latest stable Go release?","type":"text"}],"role":"user"}],"model":"claude-sonnet-4-6","tools":[{"input_schema":{"properties":{"query":{"description":"Search query string.","type":"string"}},"required":["query"],"type":"object"},"name":"web_search","description":"Run a web search and return the top results."}]}'

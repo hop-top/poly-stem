@@ -1,0 +1,30 @@
+# Virtualenvs
+.venv/
+venv/
+env/
+
+# Python caches
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.coverage
+.coverage.*
+htmlcov/
+
+# Build/package outputs
+dist/
+build/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# Local workspace/editor noise
+.DS_Store
+.idea/
+.vscode/

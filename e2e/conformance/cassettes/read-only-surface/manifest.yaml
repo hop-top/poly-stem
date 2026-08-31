@@ -1,0 +1,16 @@
+schema_version: "1"
+binary: stem
+binary_version: 4d3c03e
+recorder: xrr
+recorder_version: 0.1.0-alpha.3
+recorded_at: 2026-08-08T23:28:38Z
+scenario_id: stem/read-only-surface
+scenario_version: 1.0.0
+story_ref:
+  story_id: stem.conformance.read-only-surface
+  story_path: story.yaml
+  content_hash: sha256:c2298b12c280c3a9a59f7e18c88602c8f8a5d7ce0e9ce8e3cd2327975b9aab4c
+steps:
+  - id: capabilities_probe
+    cassette_dir: steps/capabilities_probe/cassette
+    captures: steps/capabilities_probe

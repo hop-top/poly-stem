@@ -1,0 +1,64 @@
+# stem sessions pack — `stem sessions list --format json` shape.
+# Pins docs/specs/sessions-cli.md §3.1–§3.2. Required fields are
+# always emitted (null when unknown); unknown extra fields are
+# allowed (additive evolution within 0.1).
+name: stem-sessions-list-json-0.1
+provider: stem
+evaluators:
+  - name: json_schema_valid
+    mode: binary
+    schema:
+      $defs:
+        session_summary:
+          type: object
+          required:
+            - id
+            - source
+            - created_at
+            - updated_at
+            - turn_count
+            - cwd
+            - git_branch
+            - title
+            - parent_id
+            - fork_point
+            - dispatched_from
+            - store
+          properties:
+            id: { type: string, minLength: 4 }
+            source:
+              type: object
+              required: [kind, version]
+              properties:
+                kind: { type: string }
+                version: { type: string }
+                instance: { type: string }
+            created_at: { type: string, format: date-time }
+            updated_at: { type: string, format: date-time }
+            turn_count: { type: integer, minimum: 0 }
+            cwd: { type: [string, "null"] }
+            git_branch: { type: [string, "null"] }
+            title: { type: [string, "null"] }
+            parent_id: { type: [string, "null"] }
+            fork_point: { type: [integer, "null"] }
+            dispatched_from:
+              oneOf:
+                - type: "null"
+                - type: object
+                  required: [envelope_id, call_id]
+                  properties:
+                    envelope_id: { type: string }
+                    call_id: { type: string }
+            store:
+              type: object
+              required: [adapter, path]
+              properties:
+                adapter: { type: string }
+                path: { type: string }
+      type: object
+      required: [sessions, truncated]
+      properties:
+        sessions:
+          type: array
+          items: { $ref: "#/$defs/session_summary" }
+        truncated: { type: boolean }

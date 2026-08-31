@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/hop-top/kit/main/contracts/story-schema.json
+schema_version: "1"
+story_id: stem.sessions.show-envelope-json
+title: Export one session as a crtx envelope for another tool
+binary: stem
+intent: |
+  A developer piping a session into a crtx-aware tool — an indexer, a
+  replay harness, a converter — needs the normalized envelope itself,
+  not a rendering of it. They request JSON output, which emits the
+  crtx v0.1 Envelope verbatim with no wrapper, so anything that speaks
+  crtx consumes it directly.
+preconditions:
+  - a session id prefix was taken from stem sessions list output
+steps:
+  - id: envelope
+    intent: |
+      Emit the session's normalized crtx envelope as one JSON document
+      on stdout. The developer pipes it into the downstream tool or
+      saves it as a fixture.
+    invoke: ["stem", "sessions", "show", "0198f2d4", "--format", "json"]
+    capture: [exit_code, stdout]
+references:
+  - title: crtx v0.1 envelope schema
+    url: https://github.com/hop-top/spec-crtx/blob/main/specs/v0.1/envelope.schema.json

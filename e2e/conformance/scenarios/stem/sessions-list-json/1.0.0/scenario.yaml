@@ -1,0 +1,70 @@
+schema_version: "1"
+scenario_id: sessions-list-json
+description: >-
+  Session enumeration and lineage in JSON mode: structured stdout,
+  inspectable session state (source, recency, backing store) and fork
+  ancestry, clean exits.
+binary: stem
+factor_coverage: [3, 8, 11]
+tier: 3
+story_ref:
+  story_id: stem.conformance.sessions-list-json
+  story_path: stories/sessions-list-json.yaml
+  content_hash: "sha256:c73452c3ec489bd328c4931e84114168b4f69e31cb236033b5c97b0f42d92f00"
+steps:
+  - id: list_json
+    invoke: ["stem", "sessions", "list", "--format", "json"]
+    capture: [exit_code, stdout, stderr]
+  - id: lineage_json
+    invoke: ["stem", "sessions", "lineage", "0198bb00-2222-7abc-8def-aabbccddeeff", "--format", "json"]
+    capture: [exit_code, stdout, stderr]
+assertions:
+  - id: stdout-is-json
+    kind: stream_discipline_pass
+    on: list_json
+    factor: 3
+  - id: list-schema
+    kind: output_schema_matches
+    on: list_json
+    factor: 3
+    schema:
+      type: object
+      required: [sessions, truncated]
+      properties:
+        sessions:
+          type: array
+          items:
+            type: object
+            required: [id, source, created_at, updated_at, turn_count, store]
+        truncated: { type: boolean }
+  - id: session-store-inspectable
+    kind: output_field_present
+    on: list_json
+    factor: 8
+    path: "sessions.0.store.adapter"
+  - id: session-recency-inspectable
+    kind: output_field_present
+    on: list_json
+    factor: 8
+    path: "sessions.0.updated_at"
+  - id: lineage-fork-relation-inspectable
+    kind: output_field_equals
+    on: lineage_json
+    factor: 8
+    path: "nodes.1.relation"
+    value: "fork"
+  - id: lineage-parent-inspectable
+    kind: output_field_present
+    on: lineage_json
+    factor: 8
+    path: "nodes.1.parent"
+  - id: list-exits-zero
+    kind: exit_code_equals
+    on: list_json
+    factor: 11
+    value: 0
+  - id: lineage-exits-zero
+    kind: exit_code_equals
+    on: lineage_json
+    factor: 11
+    value: 0

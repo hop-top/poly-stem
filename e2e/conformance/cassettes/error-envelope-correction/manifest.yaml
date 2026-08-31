@@ -1,0 +1,25 @@
+schema_version: "1"
+binary: stem
+binary_version: 4d3c03e
+recorder: xrr
+recorder_version: 0.1.0-alpha.3
+recorded_at: 2026-08-08T23:28:38Z
+scenario_id: stem/error-envelope-correction
+scenario_version: 1.0.0
+story_ref:
+  story_id: stem.conformance.error-envelope-correction
+  story_path: story.yaml
+  content_hash: sha256:760bfd75c87c4d9ac54e456a716875ab0a5a39d3626b5918eabb9d28eb4fab94
+steps:
+  - id: show_missing
+    cassette_dir: steps/show_missing/cassette
+    captures: steps/show_missing
+  - id: show_ambiguous
+    cassette_dir: steps/show_ambiguous/cassette
+    captures: steps/show_ambiguous
+  - id: unknown_flag
+    cassette_dir: steps/unknown_flag/cassette
+    captures: steps/unknown_flag
+  - id: unknown_command
+    cassette_dir: steps/unknown_command/cassette
+    captures: steps/unknown_command
