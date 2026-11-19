@@ -76,6 +76,9 @@ type record struct {
 	JSONRPC string          `json:"jsonrpc"`
 	Method  string          `json:"method"`
 	Params  json.RawMessage `json:"params"`
+	// Server output omits jsonrpc; responses carry id + result/error.
+	Result json.RawMessage `json:"result"`
+	Error  json.RawMessage `json:"error"`
 }
 
 // sessionMeta is the payload of a session_meta record, across
@@ -161,7 +164,7 @@ func (p *LineReader) line(raw []byte) {
 		p.rep.skip(SkipMalformedLine)
 		return
 	}
-	if rec.Method != "" || rec.JSONRPC != "" {
+	if rec.Method != "" || rec.JSONRPC != "" || len(rec.Result) > 0 || len(rec.Error) > 0 {
 		p.rpc(rec)
 		return
 	}

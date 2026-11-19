@@ -51,6 +51,7 @@ func NewLineReader(opts ...LineOption) *LineReader {
 		account:   Account{SkippedRecords: map[string]int{}},
 		refs:      DispatchIndex{},
 		openCalls: map[string]struct{}{},
+		userUUIDs: map[string]struct{}{},
 	}
 	for _, o := range opts {
 		o(p)

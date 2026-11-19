@@ -29,7 +29,7 @@ func records(t *testing.T, path string) []projection.Record {
 	return out
 }
 
-const claudeFixture = "../adapters/claudecode/testdata/stream/session.jsonl"
+const claudeFixture = "../adapters/claudecode/testdata/stream/live/session.jsonl"
 const codexFixture = "../adapters/codex/testdata/appserver/thread.jsonl"
 
 func TestProjectClaude(t *testing.T) {
@@ -39,10 +39,10 @@ func TestProjectClaude(t *testing.T) {
 		_, err := p.Apply(rec)
 		require.NoError(t, err)
 	}
-	assert.Equal(t, uint64(11), p.Position())
+	assert.Equal(t, uint64(27), p.Position())
 	env, err := p.Envelope()
 	require.NoError(t, err)
-	require.Len(t, env.Turns, 5)
+	require.Len(t, env.Turns, 6)
 	require.NoError(t, stem.Validate(env))
 }
 
@@ -68,10 +68,11 @@ func TestSinceCursor(t *testing.T) {
 		require.NoError(t, err)
 	}
 	all := p.Since(0)
-	require.Len(t, all, 5)
-	// Turns produced by seq 3 (user), 7, 8, 9, 10.
-	assert.Len(t, p.Since(3), 4)
-	assert.Len(t, p.Since(9), 1)
+	require.Len(t, all, 6)
+	// Turns come from seq 2 (user), 10, 13, 14, 21, 22.
+	assert.Len(t, p.Since(2), 5)
+	assert.Len(t, p.Since(13), 3)
+	assert.Len(t, p.Since(21), 1)
 	assert.Empty(t, p.Since(p.Position()))
 }
 
@@ -109,5 +110,5 @@ func TestNewUnknownKind(t *testing.T) {
 func TestProjectHelper(t *testing.T) {
 	p, err := projection.Project("codex", records(t, codexFixture))
 	require.NoError(t, err)
-	assert.Equal(t, uint64(14), p.Position())
+	assert.Equal(t, uint64(24), p.Position())
 }

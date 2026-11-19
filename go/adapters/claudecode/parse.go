@@ -23,6 +23,7 @@ type nativeRecord struct {
 	SessionIDSnk  string          `json:"session_id"`
 	AgentID       string          `json:"agentId"`
 	IsMeta        bool            `json:"isMeta"`
+	IsSynthetic   bool            `json:"isSynthetic"`
 	Timestamp     string          `json:"timestamp"`
 	CWD           string          `json:"cwd"`
 	GitBranch     string          `json:"gitBranch"`
@@ -110,6 +111,7 @@ type LineReader struct {
 	account   Account
 	refs      DispatchIndex
 	openCalls map[string]struct{}
+	userUUIDs map[string]struct{}
 	sidechain bool
 	path      string
 	abs       string
@@ -168,7 +170,24 @@ func (p *LineReader) Feed(raw []byte, at time.Time) []stem.Turn {
 			p.account.SkippedRecords[rec.Type+":meta"]++
 			return nil
 		}
+		if rec.IsSynthetic && rec.Type == "user" {
+			// Stream-json compaction summary: injected context, not
+			// an utterance; the history it replaces is still fed.
+			p.account.SkippedRecords["user:synthetic"]++
+			return nil
+		}
+		if rec.Type == "user" && rec.UUID != "" {
+			// The host's stdin copy and the isReplay echo of one
+			// message share a uuid; the first seen is the turn.
+			if _, dup := p.userUUIDs[rec.UUID]; dup {
+				p.account.SkippedRecords["user:duplicate"]++
+				return nil
+			}
+		}
 		if t, ok := p.turnRecord(rec, at); ok {
+			if t.Role != stem.RoleAssistant {
+				p.userUUIDs[t.ID] = struct{}{}
+			}
 			return []stem.Turn{t}
 		}
 	case "queue-operation":

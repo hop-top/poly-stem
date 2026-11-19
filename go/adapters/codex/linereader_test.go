@@ -42,22 +42,26 @@ func TestLineReaderAppServer(t *testing.T) {
 		perLine = append(perLine, len(got))
 		turns = append(turns, got...)
 	}
-	// response, thread/started, turn/started, item/started, user item,
-	// reasoning delta, reasoning item, item/started, output delta,
-	// command item (call + result), 2 deltas, agent item, turn/completed.
-	assert.Equal(t, []int{0, 0, 0, 0, 1, 0, 1, 0, 0, 2, 0, 0, 1, 0}, perLine)
+	// Server output has no jsonrpc member: responses are {id,result},
+	// server requests {id,method,params}, notifications {method,params}.
+	// Only completed items yield turns; the command item yields its
+	// call and result.
+	want := make([]int, 24)
+	want[8], want[9], want[13], want[17] = 1, 1, 2, 1
+	assert.Equal(t, want, perLine)
 
 	require.Len(t, turns, 5)
 	assert.Equal(t, stem.RoleUser, turns[0].Role)
-	assert.Equal(t, "item-1", turns[0].ID)
-	assert.Equal(t, time.UnixMilli(1795000001010).UTC(), turns[0].CreatedAt)
+	assert.Equal(t, "u-0001", turns[0].ID)
+	assert.Equal(t, time.UnixMilli(1795000001000).UTC(), turns[0].CreatedAt)
 	assert.Equal(t, stem.PartTypeThinking, turns[1].Content[0].Type)
 	assert.Equal(t, stem.PartTypeToolCall, turns[2].Content[0].Type)
-	assert.Equal(t, "item-3", turns[2].Content[0].CallID)
-	assert.JSONEq(t, `{"command":"ls","cwd":"/work/demo"}`, string(turns[2].Content[0].Input))
+	assert.Equal(t, "exec-0001", turns[2].Content[0].CallID)
+	assert.JSONEq(t, `{"command":"/bin/zsh -lc 'touch demo.txt'","cwd":"/work/demo"}`, string(turns[2].Content[0].Input))
 	assert.Equal(t, stem.RoleTool, turns[3].Role)
-	assert.Equal(t, "item-3", turns[3].Content[0].CallID)
-	assert.Equal(t, "Two files: a.txt, b.txt.", turns[4].Content[0].Text)
+	assert.Equal(t, "exec-0001", turns[3].Content[0].CallID)
+	assert.False(t, turns[3].Content[0].IsError)
+	assert.Equal(t, "ok", turns[4].Content[0].Text)
 
 	env, err := r.Envelope()
 	require.NoError(t, err)
@@ -68,8 +72,10 @@ func TestLineReaderAppServer(t *testing.T) {
 	validateEnvelope(t, env)
 
 	skips := r.Account().Skipped()
-	assert.Equal(t, 4, skips[codex.SkipDelta])
-	assert.Equal(t, 5, skips[codex.SkipNotification])
+	assert.Equal(t, 2, skips[codex.SkipDelta])
+	assert.Equal(t, 16, skips[codex.SkipNotification])
+	assert.Equal(t, 1, skips[codex.SkipUnknownItem]) // contextCompaction
+	assert.Zero(t, skips[codex.SkipUnknownRecord], "RPC responses are not rollout records")
 }
 
 func TestLineReaderAppServerUnknownItemAndOrphan(t *testing.T) {
