@@ -11,6 +11,7 @@ import (
 	"time"
 
 	stem "hop.top/stem"
+	"hop.top/stem/adapters"
 )
 
 // nativeRecord is the tolerant superset of one store line across
@@ -19,6 +20,7 @@ type nativeRecord struct {
 	Type          string          `json:"type"`
 	UUID          string          `json:"uuid"`
 	SessionID     string          `json:"sessionId"`
+	SessionIDSnk  string          `json:"session_id"`
 	AgentID       string          `json:"agentId"`
 	IsMeta        bool            `json:"isMeta"`
 	Timestamp     string          `json:"timestamp"`
@@ -27,6 +29,10 @@ type nativeRecord struct {
 	Version       string          `json:"version"`
 	Message       json.RawMessage `json:"message"`
 	ToolUseResult json.RawMessage `json:"toolUseResult"`
+	ToolUseResSnk json.RawMessage `json:"tool_use_result"`
+	// CLIVersion is the stream-json spelling of version, carried by
+	// the system/init record.
+	CLIVersion string `json:"claude_code_version"`
 	// Content is the queue-operation payload (a string); system
 	// records reuse the key with other shapes, ignored here.
 	Content json.RawMessage `json:"content"`
@@ -73,23 +79,17 @@ func ParseFile(path string, dispatch DispatchIndex) (*Result, error) {
 	}
 	defer f.Close()
 
-	abs, err := filepath.Abs(path)
-	if err != nil {
+	if _, err := filepath.Abs(path); err != nil {
 		return nil, fmt.Errorf("claudecode: %w", err)
 	}
 
-	p := &parser{
-		account:   Account{Path: path, SkippedRecords: map[string]int{}},
-		refs:      DispatchIndex{},
-		openCalls: map[string]struct{}{},
-		sidechain: strings.HasPrefix(filepath.Base(path), agentFilePrefix),
-	}
+	p := NewLineReader(WithNativePath(path), withDispatch(dispatch))
 
 	r := bufio.NewReader(f)
 	for {
 		line, err := r.ReadBytes('\n')
 		if len(line) > 0 {
-			p.line(line)
+			p.Feed(line, time.Time{})
 		}
 		if err == io.EOF {
 			break
@@ -99,15 +99,21 @@ func ParseFile(path string, dispatch DispatchIndex) (*Result, error) {
 		}
 	}
 
-	return p.result(path, abs, dispatch), nil
+	return p.result(), nil
 }
 
-// parser accumulates envelope state across one file's lines.
-type parser struct {
+// LineReader accumulates envelope state across native lines fed one
+// at a time: transcript lines from a store file, or stream-json lines
+// from a live process. It implements adapters.LineReader and is the
+// single parse path behind ParseFile. Not safe for concurrent use.
+type LineReader struct {
 	account   Account
 	refs      DispatchIndex
 	openCalls map[string]struct{}
 	sidechain bool
+	path      string
+	abs       string
+	dispatch  DispatchIndex
 
 	turns     []stem.Turn
 	sessionID string
@@ -117,26 +123,37 @@ type parser struct {
 	gitBranch string
 }
 
-func (p *parser) line(raw []byte) {
+// Feed consumes one native line and returns the turns it completed
+// (zero or one). Lines whose record carries no timestamp (stream-json)
+// are stamped with at; a zero at leaves such records skipped. Partial
+// stream events never produce turns: the complete assistant record
+// that follows them does.
+func (p *LineReader) Feed(raw []byte, at time.Time) []stem.Turn {
 	trimmed := strings.TrimSpace(string(raw))
 	if trimmed == "" {
-		return
+		return nil
 	}
 	var rec nativeRecord
 	if err := json.Unmarshal([]byte(trimmed), &rec); err != nil {
 		p.account.MalformedLines++
-		return
+		return nil
 	}
 
 	// Identity and provenance: first non-empty value wins.
 	if p.sessionID == "" {
 		p.sessionID = rec.SessionID
 	}
+	if p.sessionID == "" {
+		p.sessionID = rec.SessionIDSnk
+	}
 	if p.agentID == "" {
 		p.agentID = rec.AgentID
 	}
 	if p.version == "" {
 		p.version = rec.Version
+	}
+	if p.version == "" {
+		p.version = rec.CLIVersion
 	}
 	if p.cwd == "" {
 		p.cwd = rec.CWD
@@ -149,9 +166,11 @@ func (p *parser) line(raw []byte) {
 	case "user", "assistant":
 		if rec.IsMeta {
 			p.account.SkippedRecords[rec.Type+":meta"]++
-			return
+			return nil
 		}
-		p.turnRecord(rec)
+		if t, ok := p.turnRecord(rec, at); ok {
+			return []stem.Turn{t}
+		}
 	case "queue-operation":
 		// Not a turn, but a queued task-notification is the only
 		// linkage trace when the session ended before injection.
@@ -163,26 +182,30 @@ func (p *parser) line(raw []byte) {
 	default:
 		p.account.SkippedRecords[rec.Type]++
 	}
+	return nil
 }
 
 // turnRecord maps one user/assistant record to a Turn, or accounts
 // for why it could not.
-func (p *parser) turnRecord(rec nativeRecord) {
+func (p *LineReader) turnRecord(rec nativeRecord, at time.Time) (stem.Turn, bool) {
 	ts, tsErr := time.Parse(time.RFC3339, rec.Timestamp)
+	if tsErr != nil && rec.Timestamp == "" && !at.IsZero() {
+		ts, tsErr = at.UTC(), nil
+	}
 	if rec.UUID == "" || tsErr != nil {
 		p.account.SkippedTurnRecords++
-		return
+		return stem.Turn{}, false
 	}
 	var msg nativeMessage
 	if err := json.Unmarshal(rec.Message, &msg); err != nil {
 		p.account.SkippedTurnRecords++
-		return
+		return stem.Turn{}, false
 	}
 
 	parts, toolResultOnly := p.parts(rec, msg)
 	if len(parts) == 0 {
 		p.account.SkippedTurnRecords++
-		return
+		return stem.Turn{}, false
 	}
 
 	role := stem.RoleUser
@@ -193,18 +216,20 @@ func (p *parser) turnRecord(rec nativeRecord) {
 		role = stem.RoleTool
 	}
 
-	p.turns = append(p.turns, stem.Turn{
+	turn := stem.Turn{
 		ID:        rec.UUID,
 		Role:      role,
 		CreatedAt: ts,
 		Content:   parts,
 		AgentID:   rec.AgentID,
-	})
+	}
+	p.turns = append(p.turns, turn)
+	return turn, true
 }
 
 // parts maps the record's content blocks; toolResultOnly reports
 // whether every mapped part is a tool_result (drives the tool role).
-func (p *parser) parts(rec nativeRecord, msg nativeMessage) (parts []stem.ContentPart, toolResultOnly bool) {
+func (p *LineReader) parts(rec nativeRecord, msg nativeMessage) (parts []stem.ContentPart, toolResultOnly bool) {
 	// Legacy vintage: content is a plain JSON string.
 	var legacy string
 	if err := json.Unmarshal(msg.Content, &legacy); err == nil {
@@ -219,7 +244,11 @@ func (p *parser) parts(rec nativeRecord, msg nativeMessage) (parts []stem.Conten
 
 	// The completed-dispatch record names the sidechain this result
 	// spawned; harvest it for linkage before mapping blocks.
-	dispatchAgentID := agentIDFrom(rec.ToolUseResult)
+	tur := rec.ToolUseResult
+	if len(tur) == 0 {
+		tur = rec.ToolUseResSnk
+	}
+	dispatchAgentID := agentIDFrom(tur)
 
 	toolResultOnly = len(blocks) > 0
 	for _, b := range blocks {
@@ -240,7 +269,7 @@ func (p *parser) parts(rec nativeRecord, msg nativeMessage) (parts []stem.Conten
 
 // block maps one content block. ok is false when the block was
 // dropped (unknown type, orphan tool_result, unusable image).
-func (p *parser) block(b nativeBlock, dispatchAgentID string) (part stem.ContentPart, ok bool) {
+func (p *LineReader) block(b nativeBlock, dispatchAgentID string) (part stem.ContentPart, ok bool) {
 	switch b.Type {
 	case "text":
 		p.harvestTaskNotification(b.Text)
@@ -320,7 +349,7 @@ func (p *parser) block(b nativeBlock, dispatchAgentID string) (part stem.Content
 // a <task-notification> payload: <task-id> names the sidechain,
 // <tool-use-id> the spawning tool call. Synchronous refs (from
 // toolUseResult) are authoritative and never overwritten.
-func (p *parser) harvestTaskNotification(text string) {
+func (p *LineReader) harvestTaskNotification(text string) {
 	if !strings.Contains(text, "<task-notification>") {
 		return
 	}
@@ -365,8 +394,22 @@ func agentIDFrom(raw json.RawMessage) string {
 	return probe.AgentID
 }
 
+// Envelope snapshots the session accumulated so far; nil, nil while
+// no turn has been mapped. Implements adapters.LineReader.
+func (p *LineReader) Envelope() (*stem.Session, error) {
+	env := p.result().Envelope
+	if env != nil && env.ID == "" {
+		return nil, ErrNoSession
+	}
+	return env, nil
+}
+
+// Account implements adapters.LineReader.
+func (p *LineReader) Account() adapters.Accounting { return p.account }
+
 // result assembles the envelope from accumulated parser state.
-func (p *parser) result(path, abs string, dispatch DispatchIndex) *Result {
+func (p *LineReader) result() *Result {
+	path, abs, dispatch := p.path, p.abs, p.dispatch
 	res := &Result{Account: p.account, DispatchRefs: p.refs}
 	if len(p.turns) == 0 {
 		return res
@@ -375,10 +418,10 @@ func (p *parser) result(path, abs string, dispatch DispatchIndex) *Result {
 	id := p.sessionID
 	if p.sidechain {
 		id = p.agentID
-		if id == "" {
+		if id == "" && path != "" {
 			id = strings.TrimSuffix(strings.TrimPrefix(filepath.Base(path), agentFilePrefix), ".jsonl")
 		}
-	} else if id == "" {
+	} else if id == "" && path != "" {
 		id = strings.TrimSuffix(filepath.Base(path), ".jsonl")
 	}
 
@@ -387,7 +430,10 @@ func (p *parser) result(path, abs string, dispatch DispatchIndex) *Result {
 		version = unknownVersion
 	}
 
-	metadata := map[string]any{MetaNativePath: abs}
+	metadata := map[string]any{}
+	if abs != "" {
+		metadata[MetaNativePath] = abs
+	}
 	if p.cwd != "" {
 		metadata[MetaCWD] = p.cwd
 	}

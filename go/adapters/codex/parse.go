@@ -16,13 +16,13 @@ import (
 )
 
 // Option configures Parse.
-type Option func(*parser)
+type Option func(*LineReader)
 
 // WithNativePath records path as the envelope's native store file
 // (MetaNativePath metadata) and enables recovering the session id
 // from the rollout filename when no session_meta record survives.
 func WithNativePath(path string) Option {
-	return func(p *parser) { p.nativePath = path }
+	return func(p *LineReader) { p.nativePath = path }
 }
 
 // ParseFile parses one rollout file into a crtx Envelope. The
@@ -45,19 +45,13 @@ func ParseFile(path string) (*stem.Session, *Report, error) {
 // parse-level failures are reader errors and inputs with no session
 // identity (ErrNoSession).
 func Parse(r io.Reader, opts ...Option) (*stem.Session, *Report, error) {
-	p := &parser{
-		rep:       &Report{},
-		openCalls: map[string]struct{}{},
-	}
-	for _, opt := range opts {
-		opt(p)
-	}
+	p := NewLineReader(opts...)
 
 	br := bufio.NewReaderSize(r, 64*1024)
 	for {
 		line, err := br.ReadBytes('\n')
 		if len(bytes.TrimSpace(line)) > 0 {
-			p.line(bytes.TrimSpace(line))
+			p.Feed(bytes.TrimSpace(line), time.Time{})
 		}
 		if err == io.EOF {
 			break
@@ -66,7 +60,7 @@ func Parse(r io.Reader, opts ...Option) (*stem.Session, *Report, error) {
 			return nil, p.rep, err
 		}
 	}
-	s, err := p.finish()
+	s, err := p.Envelope()
 	return s, p.rep, err
 }
 
@@ -77,6 +71,11 @@ type record struct {
 	Timestamp string          `json:"timestamp"`
 	Type      string          `json:"type"`
 	Payload   json.RawMessage `json:"payload"`
+
+	// App-server JSON-RPC envelope fields.
+	JSONRPC string          `json:"jsonrpc"`
+	Method  string          `json:"method"`
+	Params  json.RawMessage `json:"params"`
 }
 
 // sessionMeta is the payload of a session_meta record, across
@@ -101,9 +100,21 @@ type gitInfo struct {
 	Branch     string `json:"branch"`
 }
 
-type parser struct {
+// LineReader accumulates envelope state across native lines fed one
+// at a time. It accepts two line shapes and tells them apart per
+// line: rollout records ({timestamp,type,payload}, from the store
+// files) and app-server JSON-RPC messages ({method,params}, from a
+// live `codex app-server`). It is the single parse path behind Parse
+// and implements adapters.LineReader. Not safe for concurrent use.
+type LineReader struct {
 	rep        *Report
 	nativePath string
+	seedID     string
+
+	// at is the fallback timestamp of the line being fed; out
+	// collects the turns that line emitted.
+	at  time.Time
+	out []stem.Turn
 
 	meta      *sessionMeta
 	createdAt time.Time
@@ -113,7 +124,36 @@ type parser struct {
 	openCalls map[string]struct{}
 }
 
-func (p *parser) line(raw []byte) {
+// Feed consumes one native line and returns the turns it completed,
+// in envelope order (a tool item yields its call and its result).
+// at stamps turns whose line carries no timestamp; a zero at falls
+// back to the last timestamp seen. Streaming deltas and lifecycle
+// notifications produce no turns: the completed item carries the
+// full content.
+func (p *LineReader) Feed(raw []byte, at time.Time) []stem.Turn {
+	raw = bytes.TrimSpace(raw)
+	if len(raw) == 0 {
+		return nil
+	}
+	p.at, p.out = at.UTC(), nil
+	p.line(raw)
+	return p.out
+}
+
+func (p *LineReader) observe(ts time.Time) {
+	if ts.IsZero() {
+		return
+	}
+	p.lastTS = ts
+	if p.createdAt.IsZero() {
+		p.createdAt = ts
+	}
+	if ts.After(p.updatedAt) {
+		p.updatedAt = ts
+	}
+}
+
+func (p *LineReader) line(raw []byte) {
 	p.rep.Lines++
 
 	var rec record
@@ -121,16 +161,12 @@ func (p *parser) line(raw []byte) {
 		p.rep.skip(SkipMalformedLine)
 		return
 	}
-	ts := parseTime(rec.Timestamp)
-	if !ts.IsZero() {
-		p.lastTS = ts
-		if p.createdAt.IsZero() {
-			p.createdAt = ts
-		}
-		if ts.After(p.updatedAt) {
-			p.updatedAt = ts
-		}
+	if rec.Method != "" || rec.JSONRPC != "" {
+		p.rpc(rec)
+		return
 	}
+	ts := parseTime(rec.Timestamp)
+	p.observe(ts)
 
 	switch rec.Type {
 	case "session_meta":
@@ -150,7 +186,7 @@ func (p *parser) line(raw []byte) {
 	}
 }
 
-func (p *parser) sessionMeta(rec record) {
+func (p *LineReader) sessionMeta(rec record) {
 	if p.meta != nil {
 		// Fork files carry the copied parent's session_meta (and some
 		// vintages repeat their own); the first record is the file's
@@ -169,7 +205,7 @@ func (p *parser) sessionMeta(rec record) {
 	}
 }
 
-func (p *parser) responseItem(rec record, ts time.Time) {
+func (p *LineReader) responseItem(rec record, ts time.Time) {
 	var probe struct {
 		Type string `json:"type"`
 	}
@@ -196,7 +232,7 @@ func (p *parser) responseItem(rec record, ts time.Time) {
 	}
 }
 
-func (p *parser) message(payload json.RawMessage, ts time.Time) {
+func (p *LineReader) message(payload json.RawMessage, ts time.Time) {
 	var msg struct {
 		Role    string `json:"role"`
 		Content []struct {
@@ -242,7 +278,7 @@ func (p *parser) message(payload json.RawMessage, ts time.Time) {
 	p.emit(role, ts, parts...)
 }
 
-func (p *parser) reasoning(payload json.RawMessage, ts time.Time) {
+func (p *LineReader) reasoning(payload json.RawMessage, ts time.Time) {
 	var rs struct {
 		Summary []struct {
 			Text string `json:"text"`
@@ -274,7 +310,7 @@ func (p *parser) reasoning(payload json.RawMessage, ts time.Time) {
 	p.emit(stem.RoleAssistant, ts, parts...)
 }
 
-func (p *parser) toolCall(payload json.RawMessage, ts time.Time, custom bool) {
+func (p *LineReader) toolCall(payload json.RawMessage, ts time.Time, custom bool) {
 	var tc struct {
 		Name      string `json:"name"`
 		CallID    string `json:"call_id"`
@@ -308,7 +344,7 @@ func (p *parser) toolCall(payload json.RawMessage, ts time.Time, custom bool) {
 	})
 }
 
-func (p *parser) toolResult(payload json.RawMessage, ts time.Time) {
+func (p *LineReader) toolResult(payload json.RawMessage, ts time.Time) {
 	var tr struct {
 		CallID string          `json:"call_id"`
 		Output json.RawMessage `json:"output"`
@@ -335,23 +371,31 @@ func (p *parser) toolResult(payload json.RawMessage, ts time.Time) {
 	})
 }
 
-func (p *parser) emit(role stem.Role, ts time.Time, parts ...stem.ContentPart) {
+func (p *LineReader) emit(role stem.Role, ts time.Time, parts ...stem.ContentPart) {
+	p.append(fmt.Sprintf("t_%06d", len(p.turns)+1), role, ts, parts...)
+}
+
+// append stamps and records one turn.
+func (p *LineReader) append(id string, role stem.Role, ts time.Time, parts ...stem.ContentPart) {
+	if ts.IsZero() {
+		ts = p.at
+	}
 	if ts.IsZero() {
 		ts = p.lastTS
 	}
 	if ts.IsZero() {
 		ts = p.createdAt
 	}
-	p.turns = append(p.turns, stem.Turn{
-		ID:        fmt.Sprintf("t_%06d", len(p.turns)+1),
-		Role:      role,
-		CreatedAt: ts,
-		Content:   parts,
-	})
+	t := stem.Turn{ID: id, Role: role, CreatedAt: ts, Content: parts}
+	p.turns = append(p.turns, t)
+	p.out = append(p.out, t)
 	p.rep.Turns++
 }
 
-func (p *parser) finish() (*stem.Session, error) {
+// Envelope snapshots the session accumulated so far. It fails with
+// ErrNoSession while no identity or timestamp has been seen.
+// Implements adapters.LineReader.
+func (p *LineReader) Envelope() (*stem.Session, error) {
 	id, version := p.identity()
 	if id == "" {
 		return nil, ErrNoSession
@@ -384,7 +428,7 @@ func (p *parser) finish() (*stem.Session, error) {
 // for the id: session_meta.id, session_meta.session_id, rollout
 // filename UUID. The id is always the native store's identifier
 // verbatim, never re-minted.
-func (p *parser) identity() (id, version string) {
+func (p *LineReader) identity() (id, version string) {
 	version = "unknown"
 	if p.meta != nil {
 		if p.meta.CliVersion != "" {
@@ -397,13 +441,16 @@ func (p *parser) identity() (id, version string) {
 			return p.meta.SessionID, version
 		}
 	}
+	if p.seedID != "" {
+		return p.seedID, version
+	}
 	return filenameUUID(p.nativePath), version
 }
 
 // parentID resolves fork linkage per the precedence documented in
 // the package doc. id is this session's own id; a session_id equal
 // to it carries no linkage.
-func (p *parser) parentID(id string) string {
+func (p *LineReader) parentID(id string) string {
 	if p.meta == nil {
 		return ""
 	}
@@ -419,7 +466,7 @@ func (p *parser) parentID(id string) string {
 	return ""
 }
 
-func (p *parser) metadata(id string) map[string]any {
+func (p *LineReader) metadata(id string) map[string]any {
 	md := make(map[string]any)
 	if p.nativePath != "" {
 		md[MetaNativePath] = p.nativePath
@@ -449,7 +496,7 @@ func (p *parser) metadata(id string) map[string]any {
 // instructions extracts the session's system instructions across
 // vintages: base_instructions as {text} object or bare string, then
 // the legacy instructions string.
-func (p *parser) instructions() string {
+func (p *LineReader) instructions() string {
 	if len(p.meta.BaseInstructions) > 0 && !bytes.Equal(p.meta.BaseInstructions, []byte("null")) {
 		var obj struct {
 			Text string `json:"text"`
