@@ -13,6 +13,7 @@ package adapters
 
 import (
 	"iter"
+	"time"
 
 	stem "hop.top/stem"
 )
@@ -78,4 +79,30 @@ type Adapter interface {
 	DefaultRoots() []string
 	// Scan enumerates sessions under root.
 	Scan(root string) iter.Seq2[*Result, error]
+}
+
+// LineReader is the incremental seam: one native line in, the crtx
+// turns that line completed out. Where Adapter reads whole stores, a
+// LineReader is fed by a caller that already owns the lines (a
+// journal, a pipe to a live harness) and needs envelope projection
+// without touching native files.
+//
+// A reader is stateful: it keeps open tool calls, identity and the
+// accumulated turns, so lines must be fed in native order. It is not
+// safe for concurrent use.
+//
+// Skipped input (control records, partial deltas, malformed lines)
+// is accounted, never an error; Feed returns no turns for it.
+type LineReader interface {
+	// Feed consumes one native line. at is the fallback timestamp for
+	// formats whose lines carry none (stream-json); lines that carry
+	// their own timestamp ignore it. Returns the turns this line
+	// completed, in envelope order; usually zero or one.
+	Feed(line []byte, at time.Time) []stem.Turn
+	// Envelope snapshots the accumulated session. It returns nil, nil
+	// while nothing envelope-worthy has been fed; adapters that need
+	// a session identity return their sentinel error instead.
+	Envelope() (*stem.Session, error)
+	// Account reports what has been dropped or degraded so far.
+	Account() Accounting
 }
